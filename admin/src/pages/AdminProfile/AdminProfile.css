@@ -1,0 +1,104 @@
+.admin-profile-container {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  font-family: sans-serif;
+}
+
+.profile-title {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #0056b3;
+  font-weight: 700;
+  font-size: 35px;
+}
+
+.admin-info-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.admin-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.admin-details p {
+  margin: 16px 0;
+  font-size: 16px;
+}
+
+.admin-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.admin-profile-form h3{
+    font-size: 25px;
+    color: #444;
+}
+
+.admin-profile-form input[type="text"],
+.admin-profile-form input[type="email"],
+.admin-profile-form input[type="password"] {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.avatar-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.avatar-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-update-btn {
+    background-color: #218838;
+    color: white;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: 700;
+    border: 1px solid #218838;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.profile-update-btn:hover {
+  background-color: #0b641f;
+}
+
+.success-msg {
+  color: green;
+  text-align: center;
+}
+
+.error-msg {
+  color: red;
+  text-align: center;
+}
+
+.admin-profile{
+    color: #142e7f;
+    font-size: 20px;
+    font-weight: 500;
+    flex: 1 1 1px;
+}

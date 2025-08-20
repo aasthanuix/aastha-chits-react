@@ -1,0 +1,313 @@
+.dashboard-home-container {
+  max-width: 980px;
+  margin: 30px auto;
+  padding: 0 20px 50px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  background: #f9faff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-header {
+  text-align: center;
+  padding: 30px 20px 40px;
+  border-bottom: 1px solid #ddd;
+  position: relative;
+}
+
+/* .dashboard-user-icon {
+  font-size: 4.5rem;
+  color: #1a73e8;
+  margin-bottom: 10px;
+} */
+
+.dashboard-user-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.dashboard-welcome {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #1a237e;
+  margin: 0;
+}
+
+.dashboard-user {
+  color: #3949ab;
+}
+
+.dashboard-email {
+  font-size: 1rem;
+  color: #555;
+  margin-top: 6px;
+  letter-spacing: 0.03em;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 28px;
+  margin-top: 30px;
+  padding-bottom: 30px;
+}
+
+.dashboard-card {
+  background: white;
+  border-radius: 14px;
+  padding: 25px 25px 30px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  cursor: default;
+}
+
+.dashboard-card:hover {
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.22);
+  transform: translateY(-4px);
+}
+
+.card-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #283593;
+  display: flex;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.card-icon {
+  margin-right: 12px;
+  color: #3949ab;
+  font-size: 1.6rem;
+}
+
+.dashboard-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 380px;
+  overflow-y: auto;
+  border-top: 1px solid #eee;
+  border-radius: 0 0 14px 14px;
+}
+
+.dashboard-list::-webkit-scrollbar {
+  width: 7px;
+}
+
+.dashboard-list::-webkit-scrollbar-thumb {
+  background-color: #c5cae9;
+  border-radius: 10px;
+}
+
+.dashboard-list-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 1px solid #eee;
+  font-size: 1rem;
+  color: #444;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  border-radius: 8px;
+}
+
+.dashboard-list-item:hover {
+  background-color: #e8f0fe;
+  transform: scale(1.03);
+}
+
+.plan-name {
+  font-weight: 600;
+  color: #1a237e;
+}
+
+.plan-amount {
+  font-weight: 600;
+  color: #1a73e8;
+}
+
+.transactions-list {
+  max-height: 380px;
+}
+
+.transaction-item {
+  gap: 12px;
+}
+
+.txn-plan,
+.txn-amount,
+.txn-date,
+.txn-status {
+  min-width: 70px;
+  text-align: left;
+}
+
+.txn-date {
+  color: #666;
+  font-size: 0.9rem;
+  flex-grow: 1;
+}
+
+.status-pending {
+  background-color: #ffecb3;
+  color: #fbc02d;
+  padding: 3px 10px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.status-paid {
+  background-color: #c8e6c9;
+  color: #388e3c;
+  padding: 3px 10px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.empty-message {
+  padding: 25px 0;
+  font-style: italic;
+  text-align: center;
+  color: #999;
+  font-size: 1.05rem;
+}
+
+.dashboard-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #1a73e8;
+  margin-top: 80px;
+  gap: 12px;
+}
+
+.spinner {
+  animation: spin 1.4s linear infinite;
+  font-size: 2rem;
+  color: #1a73e8;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.5s ease forwards;
+}
+/* Make Auctions card span full width in the dashboard grid */
+.auctions-card {
+  grid-column: 1 / -1; /* span across all grid columns */
+  background: white;
+  border-radius: 14px;
+  padding: 25px 25px 30px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  cursor: default;
+  border: none;
+}
+
+.auctions-card:hover {
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.22);
+  transform: translateY(-4px);
+}
+
+/* Make auction list items neatly aligned using grid */
+.auction-item {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr; 
+  align-items: center;
+  padding: 12px 18px;
+  border-bottom: 1px solid #eee;
+  font-size: 1rem;
+  color: #444;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  border-radius: 8px;
+  cursor: default;
+}
+
+.auction-item:hover {
+  background-color: #e8f0fe;
+  transform: scale(1.03);
+}
+
+/* Column-specific styling */
+.auction-plan-name {
+  font-weight: 600;
+  color: #1a237e;
+}
+
+.auction-current-bid {
+  font-weight: 600;
+  color: #1a73e8;
+}
+
+.auction-date {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.auction-status {
+  padding: 3px 10px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.status-ongoing {
+  background-color: #ffd54f;
+  color: #6b4c00;
+}
+
+.status-completed {
+  background-color: #c8e6c9;
+  color: #256029;
+}
+
+.status-upcoming {
+  background-color: #bbdefb;
+  color: #0d47a1;
+}
+
+.status-unknown {
+  background-color: #e0e0e0;
+  color: #616161;
+}

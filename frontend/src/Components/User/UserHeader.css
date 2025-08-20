@@ -1,0 +1,32 @@
+/* src/components/User/UserHeader.css */
+.user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  background-color: #f4f7fc;
+  border-bottom: 1px solid #d1d1d1;
+}
+
+.user-header-left h3 {
+  font-size: 20px;
+  color: #333;
+  margin: 0;
+}
+
+.user-header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-icon {
+  font-size: 22px;
+  cursor: pointer;
+  color: #444;
+  transition: color 0.3s ease;
+}
+
+.header-icon:hover {
+  color: #1a73e8;
+}

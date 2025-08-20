@@ -1,0 +1,145 @@
+/* Container and typography */
+.dashboard-container {
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 0 20px;
+  font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.dashboard-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+  text-align: center;
+  color: #2c3e50;
+}
+
+.dashboard-desc {
+  font-size: 1.15rem;
+  color: #6c757d;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* Stats grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.8rem;
+  margin-bottom: 3rem;
+}
+
+/* Stat card */
+.stat-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.07);
+  padding: 1.2rem 1.5rem;
+  border-radius: 10px;
+  border-left: 6px solid;
+  transition: box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+  font-size: 2.8rem;
+  color: #fff;
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 1rem;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.stat-info h3 {
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin-bottom: 0.25rem;
+  color: #444;
+}
+
+.stat-value {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: 0.03em;
+}
+
+.dashboard-info {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.dashboard-info-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #333;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 8px;
+}
+
+.dashboard-info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dashboard-info-list li {
+  display: flex;
+  align-items: center;
+  background: #fafafa;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.dashboard-info-list li:hover {
+  transform: translateY(-3px);
+  background: #f5f5f5;
+}
+
+.tip-icon {
+  font-size: 1.4rem;
+  margin-right: 10px;
+}
+
+.tip-icon.pending {
+  color: #ff9800;
+}
+
+.tip-icon.active {
+  color: #2196f3;
+}
+
+.tip-icon.completed {
+  color: #4caf50;
+}
+
+.tip-icon.reports {
+  color: #9c27b0;
+}
+
+/* Responsive tweaks */
+@media (max-width: 480px) {
+  .stat-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .stat-icon {
+    margin-bottom: 0.6rem;
+  }
+}

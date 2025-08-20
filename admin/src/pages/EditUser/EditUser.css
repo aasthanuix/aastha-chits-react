@@ -1,0 +1,93 @@
+/* src/components/EditUser/EditUser.css */
+
+/* Form styling */
+.edit-user-page {
+  max-width: 500px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+
+.edit-user-page h2 {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.edit-user-page form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edit-user-page input,
+.edit-user-page select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.edit-user-page select[multiple] {
+  height: auto;
+  padding: 8px;
+}
+
+/* Button group - side by side */
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.button-group .btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.update-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.update-btn:hover {
+  background-color: #0066d6;
+}
+
+.transaction-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.transaction-btn:hover {
+  background-color: #218838;
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Modal box */
+.modal {
+  background: #fff;
+  padding: 20px;
+  width: 420px;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}

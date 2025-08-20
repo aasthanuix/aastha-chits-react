@@ -1,0 +1,18 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Redirect all /api requests to your Node.js app
+  RewriteCond %{REQUEST_URI} ^/api
+  RewriteRule ^(.*)$ http://localhost:4000/$1 [P,L]
+
+  # Ensure preflight OPTIONS requests also pass
+  Header always set Access-Control-Allow-Origin "*"
+  Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+  Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
+</IfModule>
+
+# Enable proxy modules
+<IfModule mod_proxy.c>
+  ProxyRequests Off
+  ProxyPreserveHost On
+</IfModule>

@@ -1,0 +1,102 @@
+/* Container */
+.user-details-container {
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+/* Page Title */
+.user-details-container h2 {
+  text-align: center;
+  font-size: 26px;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+/* User Info Card */
+.user-info-card {
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.user-info-card h3 {
+  font-size: 22px;
+  margin-bottom: 10px;
+  color: #1a73e8;
+}
+
+.user-info-card p {
+  font-size: 16px;
+  margin: 6px 0;
+}
+
+.user-info-card strong {
+  color: #555;
+}
+
+/* Transactions Section */
+.user-transactions h3 {
+  font-size: 20px;
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+/* Table Styling */
+.user-transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.user-transactions-table th,
+.user-transactions-table td {
+  padding: 12px 15px;
+  text-align: center;
+  font-size: 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.user-transactions-table th {
+  background-color: #1a73e8;
+  color: white;
+  font-weight: bold;
+}
+
+.user-transactions-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* Status Colors */
+.paid {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.pending {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+/* Mark as Paid Button */
+.user-transactions-table button {
+  background: #1a73e8;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.user-transactions-table button:hover {
+  background: #155bb5;
+}

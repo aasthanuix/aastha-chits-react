@@ -1,0 +1,110 @@
+/* Overlay background */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+/* Modal box */
+.modal-box {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.3s ease-in-out;
+}
+
+/* Heading */
+.modal-box h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+/* Success & error messages */
+.success {
+  background: #d4edda;
+  color: #155724;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: center;
+}
+.error {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Form fields */
+.modal-box form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.modal-box select,
+.modal-box input {
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  transition: border 0.2s;
+}
+.modal-box select:focus,
+.modal-box input:focus {
+  border-color: #007bff;
+}
+
+/* Buttons row */
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+}
+.modal-buttons button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.modal-buttons button:first-child {
+  background: #007bff;
+  color: white;
+}
+.modal-buttons button:first-child:hover {
+  background: #0056b3;
+}
+.modal-buttons .cancel-btn {
+  background: #ccc;
+}
+.modal-buttons .cancel-btn:hover {
+  background: #999;
+}
+
+/* Slide up animation */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

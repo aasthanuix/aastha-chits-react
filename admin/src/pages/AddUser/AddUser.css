@@ -1,0 +1,58 @@
+.add-user-page {
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.add-user-page h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #2c3e50;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.add-user-page form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.add-user-page input,
+.add-user-page select {
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: 0.3s ease;
+}
+
+.add-user-page input:focus,
+.add-user-page select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 6px rgba(0, 123, 255, 0.3);
+}
+
+.add-user-page button {
+  padding: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.add-user-page button:hover {
+  background-color: #0056b3;
+}
+
+.add-user-page button:active {
+  transform: scale(0.98);
+}

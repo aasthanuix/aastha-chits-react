@@ -1,0 +1,82 @@
+/* ChitPlanInfo.css */
+
+.chitplan-container {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.chitplan-title {
+  display: flex;
+  align-items: center;
+  font-size: 1.8rem;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  font-weight: 600;
+}
+
+.chitplan-icon {
+  margin-right: 10px;
+  color: #2980b9;
+  font-size: 2.2rem;
+}
+
+.chitplan-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.chitplan-card {
+  background: #f7f9fc;
+  border-radius: 12px;
+  padding: 18px 22px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: default;
+}
+
+.chitplan-card:hover {
+  box-shadow: 0 6px 20px rgba(41, 128, 185, 0.25);
+  transform: translateY(-4px);
+}
+
+.chitplan-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #34495e;
+  margin-bottom: 12px;
+  border-bottom: 2px solid #2980b9;
+  padding-bottom: 6px;
+}
+
+.chitplan-details {
+  margin: 0;
+}
+
+.chitplan-details div {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+.chitplan-details dt {
+  font-weight: 600;
+}
+
+.chitplan-empty-message {
+  font-size: 1.1rem;
+  color: #7f8c8d;
+  text-align: center;
+  padding: 40px 0;
+  font-style: italic;
+}

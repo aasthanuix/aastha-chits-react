@@ -1,0 +1,14 @@
+.location{
+    margin-bottom: 20px;
+}
+.message-success {
+  color: green;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.message-error {
+  color: red;
+  font-weight: 600;
+  margin-top: 10px;
+}
