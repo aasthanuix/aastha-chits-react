@@ -66,7 +66,6 @@ io.on('connection', (socket) => {
 const allowedOrigins = [
   "https://aasthageooads.com",
   "https://user.aasthageooads.com",
-  "https://admin.aasthageooads.com",
 ];
 
 app.use(
