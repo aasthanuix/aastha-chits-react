@@ -63,27 +63,6 @@ io.on('connection', (socket) => {
 });
 
 // Allowed origins
-const allowedOrigins = [
-  "https://aasthageooads.com",
-  "https://user.aasthageooads.com",
-];
-
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like curl/postman) or if in allowed list
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
 app.options("*", cors());
 
 app.use(express.json());

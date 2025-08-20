@@ -84,7 +84,8 @@ router.post('/:id/transactions', protect, async (req, res) => {
   }
 });
 
-export default router;
-
 
 router.get('/stats', protect, getAdminStats);
+
+export default router;
+
