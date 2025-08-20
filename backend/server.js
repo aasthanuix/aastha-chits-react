@@ -69,13 +69,13 @@ app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
 // API Routes
-app.use('/api', mailRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/stats', statsRoutes);
-app.use('/api/chit-plans', chitPlanRoutes);
-app.use('/api/transactions', transactionRoutes);
-app.use('/api/auctions', auctionRoutes); // handles public & admin
+// app.use('/api', mailRoutes);
+// app.use('/api/admin', adminRoutes);
+// app.use('/api/users', userRoutes);
+// app.use('/api/stats', statsRoutes);
+// app.use('/api/chit-plans', chitPlanRoutes);
+// app.use('/api/transactions', transactionRoutes);
+// app.use('/api/auctions', auctionRoutes); // handles public & admin
 
 app.get('/', (_req, res) => res.send('API Working'));
 
