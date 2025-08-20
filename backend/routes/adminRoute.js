@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import  {protect} from '../middlewares/authMiddleware.js';
 import upload from '../config/multer.js';
 import {getAdminStats} from '../controllers/adminController.js'
+import User from '../models/userModel.js';
 
 const router = express.Router();
 
