@@ -22,7 +22,7 @@ const App = () => {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<Home url={url}/>} />
       <Route path="/about" element={<About />} />
       <Route path="/chits-plans" element={<ChitPlans />} />
       <Route path="/chits-benefits" element={<ChitsBenefits />} />

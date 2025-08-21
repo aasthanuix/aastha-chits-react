@@ -4,7 +4,7 @@ import { faFilePdf } from '@fortawesome/free-solid-svg-icons';
 import BrochureForm from './BrochureForm';
 import './BrochureForm.css';
 
-const Brochure = () => {
+const Brochure = ({url}) => {
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -15,7 +15,7 @@ const Brochure = () => {
         </button>
       </div>
 
-      <BrochureForm isOpen={showModal} onClose={() => setShowModal(false)} />
+      <BrochureForm url={url} isOpen={showModal} onClose={() => setShowModal(false)} />
     </>
   );
 };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './BrochureForm.css';
 
-const BrochureForm = ({ isOpen, onClose }) => {
+const BrochureForm = ({ isOpen, onClose, url }) => {
   const [formData, setFormData] = useState({ name: '', email: '', contact: '' });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -49,7 +49,7 @@ const BrochureForm = ({ isOpen, onClose }) => {
     setSubmitting(true);
 
     try {
-      const res = await fetch('http://localhost:4000/api/send-brochure', {
+      const res = await fetch(url+'/api/send-brochure', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -58,11 +58,11 @@ const BrochureForm = ({ isOpen, onClose }) => {
       const data = await res.json();
 
       if (data.success) {
-        const downloadRes = await fetch('http://localhost:4000/api/download-brochure');
+        const downloadRes = await fetch(url+'/api/download-brochure');
         const blob = await downloadRes.blob();
-        const url = window.URL.createObjectURL(blob);
+        const fileUrl = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.href = url;
+        link.href = fileUrl;
         link.setAttribute('download', 'Aastha-Brochure.pdf');
         document.body.appendChild(link);
         link.click();

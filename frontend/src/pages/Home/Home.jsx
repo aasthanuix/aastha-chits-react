@@ -9,7 +9,7 @@ import Testimonials from '../../Components/Testimonials/Testimonials'
 import Footer from '../../Components/Footer/Footer'
 import Brochure from '../../Components/Brochure/Brochure'
 
-const Home = () => {
+const Home = ({url}) => {
   return (
     <div>
       <Navbar />
@@ -19,7 +19,7 @@ const Home = () => {
       <Benefits />
       <Team />
       <Testimonials />
-      <Brochure />
+      <Brochure url={url}/>
       <Footer />
     </div>
   )
