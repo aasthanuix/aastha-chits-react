@@ -58,7 +58,7 @@ const BrochureForm = ({ isOpen, onClose, url }) => {
       const data = await res.json();
 
       if (data.success) {
-        const downloadRes = await fetch(url+'/api/download-brochure');
+        const downloadRes = await fetch(url+'/api/send-brochure');
         const blob = await downloadRes.blob();
         const fileUrl = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
