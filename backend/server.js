@@ -6,7 +6,7 @@ import http from 'http';
 import { connectDB } from './config/db.js';
 import { initIO } from './config/socket.js';
 
-import mailRoutes from './routes/emailRoute.js';
+import emailRoutes from './routes/emailRoute.js';
 import adminRoutes from './routes/adminRoute.js';
 import userRoutes from './routes/userRoute.js';
 import chitPlanRoutes from './routes/chitPlanRoute.js';
@@ -93,7 +93,7 @@ app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
 // API Routes
-app.use('/api', mailRoutes);
+app.use('/api', emailRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/stats', statsRoutes);

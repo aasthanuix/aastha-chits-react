@@ -1,38 +1,62 @@
 import resendClient from '../config/resend.js';
-import fs from 'fs';
-import path from 'path';
+import path from "path";
+import fs from "fs";
+import { v4 as uuidv4 } from "uuid";
+
+const tokenStore = new Map();
 
 export const sendBrochureEmail = async (req, res) => {
-  const { name, email, contact } = req.body;
+  const { name, email } = req.body;
 
   try {
-    const pdfPath = path.join(process.cwd(), 'uploads', 'aastha-chits-brochure.pdf');
+    // 1. Generate unique token
+    const token = uuidv4();
+    const expiry = Date.now() + 60 * 60 * 1000; // 1 hour expiry
 
-    if (!fs.existsSync(pdfPath)) {
-      return res.status(404).json({ success: false, message: "Brochure file not found" });
-    }
+    // 2. Store token + expiry
+    tokenStore.set(token, expiry);
 
-    const pdfBuffer = fs.readFileSync(pdfPath);
+    // 3. Build secure download link
+    const downloadLink = `${process.env.FRONTEND_URL}/api/download-brochure?token=${token}`;
 
+    // 4. Send via Resend
     await resendClient.emails.send({
-      from: process.env.EMAIL_FROM,
+      from: "onboarding@resend.dev",
       to: email,
-      subject: 'Aastha Chits - Brochure Request',
-      html: `<p>Hi ${name},</p><p>Thanks for your interest in Aastha Chits. Please find the brochure attached.</p>`,
-      attachments: [
-        {
-          filename: 'Aastha-Brochure.pdf',
-          content: pdfBuffer.toString('base64'),
-          encoding: 'base64',
-        },
-      ],
+      subject: "Aastha Chits - Secure Brochure Link",
+      html: `
+        <p>Hi ${name},</p>
+        <p>Thanks for your interest in Aastha Chits.</p>
+        <p><a href="${downloadLink}">Click here to download the brochure</a></p>
+        <p>(This link expires in 1 hour)</p>
+      `,
     });
 
-    res.status(200).json({ success: true });
+    res.status(200).json({ success: true, message: "Brochure link sent" });
   } catch (error) {
     console.error("Email sending failed:", error);
-    res.status(500).json({ success: false, error: "Failed to send email" });
+    res.status(500).json({ success: false, error: error.message });
   }
+};
+
+export const downloadBrochure = (req, res) => {
+  const { token } = req.query;
+
+  // Check if token exists
+  if (!tokenStore.has(token)) {
+    return res.status(403).json({ message: "Invalid or expired token" });
+  }
+
+  // Check expiry
+  const expiry = tokenStore.get(token);
+  if (Date.now() > expiry) {
+    tokenStore.delete(token);
+    return res.status(403).json({ message: "Link expired" });
+  }
+
+  // Serve the PDF
+  const pdfPath = path.join(process.cwd(), "uploads", "aastha-chits-brochure.pdf");
+  res.download(pdfPath, "Aastha-Brochure.pdf");
 };
 
 export const enrollmentEmail = async (req, res) => {

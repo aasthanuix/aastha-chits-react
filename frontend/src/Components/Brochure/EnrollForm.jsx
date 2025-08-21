@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./EnrollForm.css";
 
-const EnrollForm = ({ isOpen, onClose, selectedPlan }) => {
+const EnrollForm = ({ isOpen, onClose, selectedPlan, url }) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -53,7 +53,7 @@ const EnrollForm = ({ isOpen, onClose, selectedPlan }) => {
   setStatusType("success");  
 
   try {
-    const res = await fetch("http://localhost:4000/api/send-email", {
+    const res = await fetch(url+"/api/send-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
