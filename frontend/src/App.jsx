@@ -17,7 +17,7 @@ import ResetPassword from './pages/ForgotPassword/ResetPassword';
 
 const App = () => {
 
-  const url = "http://localhost:4000";
+  const url = "https://aasthachits-backend.onrender.com";
 
   return (
     <Routes>
