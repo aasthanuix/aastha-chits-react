@@ -1,0 +1,8 @@
+# Environment variables
+.env
+backend/.env
+frontend/.env
+
+# User uploads
+uploads/
+backend/uploads/
