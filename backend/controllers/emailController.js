@@ -9,9 +9,7 @@ export const sendBrochureEmail = async (req, res) => {
   const { name, email } = req.body;
 
   try {
-    // 1. Generate unique token
-    const token = uuidv4();
-    const expiry = Date.now() + 60 * 60 * 1000; // 1 hour expiry
+    const pdfPath = path.join(process.cwd(), 'uploads', 'aastha-chits-brochure.pdf');
 
     // 2. Store token + expiry
     tokenStore.set(token, expiry);
@@ -19,39 +17,24 @@ export const sendBrochureEmail = async (req, res) => {
     // 3. Build secure download link
     const downloadLink = `${process.env.FRONTEND_URL}/api/download-brochure?token=${token}`;
 
-    // 4. Send via Resend
     await resendClient.emails.send({
-      from: "onboarding@resend.dev",
+      from: process.env.EMAIL_FROM,
       to: email,
-      subject: "Aastha Chits - Secure Brochure Link",
-      html: `
-        <p>Hi ${name},</p>
-        <p>Thanks for your interest in Aastha Chits.</p>
-        <p><a href="${downloadLink}">Click here to download the brochure</a></p>
-        <p>(This link expires in 1 hour)</p>
-      `,
+      subject: 'Aastha Chits - Brochure Request',
+      html: `<p>Hi ${name},</p><p>Thanks for your interest in Aastha Chits. Please find the brochure attached.</p>`,
+      attachments: [
+        {
+          filename: 'Aastha-Brochure.pdf',
+          content: pdfBuffer.toString('base64'),
+          encoding: 'base64',
+        },
+      ],
     });
 
-    res.status(200).json({ success: true, message: "Brochure link sent" });
+    res.status(200).json({ success: true });
   } catch (error) {
     console.error("Email sending failed:", error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-};
-
-export const downloadBrochure = (req, res) => {
-  const { token } = req.query;
-
-  // Check if token exists
-  if (!tokenStore.has(token)) {
-    return res.status(403).json({ message: "Invalid or expired token" });
-  }
-
-  // Check expiry
-  const expiry = tokenStore.get(token);
-  if (Date.now() > expiry) {
-    tokenStore.delete(token);
-    return res.status(403).json({ message: "Link expired" });
+    res.status(500).json({ success: false, error: "Failed to send email" });
   }
 
   // Serve the PDF

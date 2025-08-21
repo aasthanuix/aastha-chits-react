@@ -39,46 +39,46 @@ const BrochureForm = ({ isOpen, onClose, url }) => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  const validationErrors = validate();
-  if (Object.keys(validationErrors).length > 0) {
-    setErrors(validationErrors);
-    return;
-  }
-
-  setSubmitting(true);
-
-  try {
-    const res = await fetch(url + '/api/send-brochure', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    });
-
-    const data = await res.json();
-
-    if (data.success && data.fileUrl) {
-      // Trigger download from signed URL
-      const link = document.createElement('a');
-      link.href = data.fileUrl;
-      link.setAttribute('download', 'Aastha-Brochure.pdf');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-
-      setShowSuccess(true);
-      setFormData({ name: '', email: '', contact: '' });
-      onClose();
-    } else {
-      alert('Failed to send brochure. Please try again.');
+    e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
     }
-  } catch (error) {
-    console.error('Error submitting form:', error);
-    alert('Something went wrong.');
-  } finally {
-    setSubmitting(false);
-  }
-};
+
+    setSubmitting(true);
+
+    try {
+      const res = await fetch(url + '/api/send-brochure', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (data.success && data.fileUrl) {
+        // Trigger download from signed URL
+        const link = document.createElement('a');
+        link.href = data.fileUrl;
+        link.setAttribute('download', 'Aastha-Brochure.pdf');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        setShowSuccess(true);
+        setFormData({ name: '', email: '', contact: '' });
+        onClose();
+      } else {
+        alert('Failed to send brochure. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('Something went wrong.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="brochure-overlay">
