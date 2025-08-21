@@ -1,17 +1,25 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { Resend } from 'resend';
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import User from '../models/userModel.js';
 import ChitPlan from '../models/chitPlanModel.js';
-import {protect} from '../middlewares/authMiddleware.js';
-import { addUser, getUserDashboard, getUserById, updateUser, uploadUserProfilePic, forgotPassword, resetPassword } from '../controllers/userController.js';
-import  uploadProfilePic  from '../config/userProfile.js';
-
+import { protect } from '../middlewares/authMiddleware.js';
+import {
+  addUser,
+  getUserDashboard,
+  getUserById,
+  updateUser,
+  uploadUserProfilePic,
+  forgotPassword,
+  resetPassword,
+} from '../controllers/userController.js';
+import uploadProfilePic from '../config/userProfile.js';
 
 const router = express.Router();
 
+//  Initialize Resend properly
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // JWT Generator
@@ -19,9 +27,7 @@ const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 };
 
-
-// USER LOGIN
-
+// ================= USER LOGIN =================
 router.post('/login', async (req, res) => {
   const { userId, password } = req.body;
 
@@ -40,9 +46,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-
-// GENERATE CREDENTIALS + SEND EMAIL (ADMIN ONLY)
-
+// ============ GENERATE CREDENTIALS + EMAIL ============
 router.post('/generate-credentials', protect, async (req, res) => {
   try {
     const { name, email, phone, enrolledChits = [] } = req.body;
@@ -73,10 +77,10 @@ router.post('/generate-credentials', protect, async (req, res) => {
       enrolledChits: chitPlanIds,
     });
 
-    // 📧 send credentials email
-    await resend.emails.send({
-      from: 'Aastha Chits <no-reply@yourdomain.com>', // Replace with a verified sender
-      to: email,
+   
+    const emailRes = await resend.emails.send({
+      from: process.env.RESEND_API_KEY, 
+      to: [email],
       subject: 'Your Aastha Chits Login Credentials',
       html: `
         <h2>Welcome to Aastha Chits, ${name}!</h2>
@@ -97,55 +101,45 @@ router.post('/generate-credentials', protect, async (req, res) => {
       userId,
       password,
       enrolledChits: chitPlanIds,
+      emailResponse: emailRes, // helpful for debugging
     });
   } catch (error) {
-  console.error('Error generating credentials:', error);
+    console.error('Error generating credentials:', error);
 
-  res.status(500).json({
-    message: 'Failed to generate credentials',
-    error: error.message || error.toString(),
-    stack: error.stack,
-    details: error.response?.body || error.response || null
-  });
+    res.status(500).json({
+      message: 'Failed to generate credentials',
+      error: error.message || error.toString(),
+      stack: error.stack,
+      details: error.response?.body || error.response || null,
+    });
   }
 });
 
+// ================= CRUD Routes =================
 
 // CREATE USER (ADMIN ONLY)
-
 router.post('/', protect, addUser);
 
-
 // GET USER DASHBOARD (AUTH)
-
 router.get('/dashboard', protect, getUserDashboard);
 
-
-// GET ALL USERS (ADMIN VIEW)
-
+// GET ALL USERS (ADMIN ONLY)
 router.get('/', protect, async (req, res) => {
   try {
-    const users = await User.find()
-      .populate('enrolledChits')
-      .sort({ createdAt: -1 });
+    const users = await User.find().populate('enrolledChits').sort({ createdAt: -1 });
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching users', error: error.message });
   }
 });
 
-
 // GET SINGLE USER BY ID
-
 router.get('/:id', protect, getUserById);
 
-
-// Use controller function that handles chit plan updates & transactions properly
+// UPDATE USER
 router.put('/:id', protect, updateUser);
 
-
 // DELETE USER (ADMIN ONLY)
-
 router.delete('/:id', protect, async (req, res) => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.params.id);
@@ -156,18 +150,11 @@ router.delete('/:id', protect, async (req, res) => {
   }
 });
 
+// UPLOAD PROFILE PIC
+router.post('/profile-pic', protect, uploadProfilePic.single('profilePic'), uploadUserProfilePic);
 
-// POST /api/users/profile-pic
-router.post(
-  '/profile-pic',
-  protect,
-  uploadProfilePic.single('profilePic'),
-  uploadUserProfilePic
-);
-
+// Forgot/Reset Password
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
-
-
 
 export default router;

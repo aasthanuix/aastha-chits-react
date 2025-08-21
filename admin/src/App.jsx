@@ -20,7 +20,7 @@ import Auctions from './pages/Auctions/Auctions';
 
 const App = () => {
 
-  const url = "https://admin.aasthageooads.com";
+  const url = "http://localhost:4000";
   
   return (
     <Routes>

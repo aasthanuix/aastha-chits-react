@@ -63,19 +63,41 @@ io.on('connection', (socket) => {
 });
 
 // Allowed origins
-app.options("*", cors());
+
+const allowedOrigins = [
+  'http://localhost:5173', 
+  'http://localhost:5174'  
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // allow requests with no origin (like Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'],
+  credentials: true
+}));
+
+app.options('*', cors()); // handle preflight requests
+
 
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
 // API Routes
-// app.use('/api', mailRoutes);
-// app.use('/api/admin', adminRoutes);
-// app.use('/api/users', userRoutes);
-// app.use('/api/stats', statsRoutes);
-// app.use('/api/chit-plans', chitPlanRoutes);
-// app.use('/api/transactions', transactionRoutes);
-// app.use('/api/auctions', auctionRoutes); // handles public & admin
+app.use('/api', mailRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/stats', statsRoutes);
+app.use('/api/chit-plans', chitPlanRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/api/auctions', auctionRoutes); // handles public & admin
 
 app.get('/', (_req, res) => res.send('API Working'));
 

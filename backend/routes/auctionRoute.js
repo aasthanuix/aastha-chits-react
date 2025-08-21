@@ -21,8 +21,8 @@ router.get("/recent", protect, getRecentAuctions);
 router.get("/", protect, getAuctions);
   
 router.post("/", protect, createAuction);
-router.patch("/:id", protect, updateAuction);
-router.patch("/:id/end", protect, endAuction);
+router.patch('/:id/end', protect, endAuction);
+router.patch('/:id', protect, updateAuction);
 router.delete("/:id", protect, deleteAuction);
 
 export default router;
