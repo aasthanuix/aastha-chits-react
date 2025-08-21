@@ -1,45 +1,40 @@
 import resendClient from '../config/resend.js';
 import path from "path";
 import fs from "fs";
-import { v4 as uuidv4 } from "uuid";
-
-const tokenStore = new Map();
 
 export const sendBrochureEmail = async (req, res) => {
   const { name, email } = req.body;
 
   try {
-    const pdfPath = path.join(process.cwd(), 'uploads', 'aastha-chits-brochure.pdf');
+    const pdfPath = path.join(process.cwd(), "uploads", "aastha-chits-brochure.pdf");
 
-    // 2. Store token + expiry
-    tokenStore.set(token, expiry);
+    if (!fs.existsSync(pdfPath)) {
+      return res.status(404).json({ success: false, message: "Brochure file not found" });
+    }
 
-    // 3. Build secure download link
-    const downloadLink = `${process.env.FRONTEND_URL}/api/download-brochure?token=${token}`;
+    const pdfBuffer = fs.readFileSync(pdfPath);
 
-    await resendClient.emails.send({
-      from: process.env.EMAIL_FROM,
+    const response = await resendClient.emails.send({
+      from: "onboarding@resend.dev",   // swap with your domain email once verified
       to: email,
-      subject: 'Aastha Chits - Brochure Request',
-      html: `<p>Hi ${name},</p><p>Thanks for your interest in Aastha Chits. Please find the brochure attached.</p>`,
+      subject: "Aastha Chits - Brochure Request",
+      html: `<p>Hi ${name},</p>
+             <p>Thanks for your interest in Aastha Chits. Please find the brochure attached.</p>`,
       attachments: [
         {
-          filename: 'Aastha-Brochure.pdf',
-          content: pdfBuffer.toString('base64'),
-          encoding: 'base64',
+          filename: "Aastha-Brochure.pdf",
+          content: pdfBuffer.toString("base64"),
+          encoding: "base64",
         },
       ],
     });
 
-    res.status(200).json({ success: true });
+    console.log("Resend response:", response);
+    res.status(200).json({ success: true, response });
   } catch (error) {
     console.error("Email sending failed:", error);
-    res.status(500).json({ success: false, error: "Failed to send email" });
+    res.status(500).json({ success: false, error: error.message || "Failed to send email" });
   }
-
-  // Serve the PDF
-  const pdfPath = path.join(process.cwd(), "uploads", "aastha-chits-brochure.pdf");
-  res.download(pdfPath, "Aastha-Brochure.pdf");
 };
 
 export const enrollmentEmail = async (req, res) => {

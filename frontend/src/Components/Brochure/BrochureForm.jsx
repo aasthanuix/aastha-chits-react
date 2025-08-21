@@ -24,15 +24,11 @@ const BrochureForm = ({ isOpen, onClose, url }) => {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = 'Name is required.';
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required.';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    
+   if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Invalid email format.';
     }
-    if (!formData.contact.trim()) {
-      newErrors.contact = 'Contact number is required.';
-    } else if (!/^\d{10}$/.test(formData.contact)) {
+   if (!/^\d{10}$/.test(formData.contact)) {
       newErrors.contact = 'Contact must be 10 digits.';
     }
     return newErrors;
