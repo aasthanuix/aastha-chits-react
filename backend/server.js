@@ -66,7 +66,8 @@ io.on('connection', (socket) => {
 
 const allowedOrigins = [
   'http://localhost:5173', 
-  'http://localhost:5174'  
+  'http://localhost:5174',
+  "https://aasthachits-frontend.onrender.com",
 ];
 
 app.use(cors({
