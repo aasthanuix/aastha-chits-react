@@ -2,8 +2,6 @@ import resendClient from '../config/resend.js';
 import fs from 'fs';
 import path from 'path';
 
-const resendClient = new Resend(process.env.RESEND_API_KEY);
-
 export const sendBrochureEmail = async (req, res) => {
   const { name, email } = req.body;
 
