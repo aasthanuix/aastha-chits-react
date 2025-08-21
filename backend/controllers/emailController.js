@@ -6,16 +6,31 @@ export const sendBrochureEmail = async (req, res) => {
   const { name, email } = req.body;
 
   try {
-    const pdfPath = path.join(process.cwd(), "uploads", "aastha-chits-brochure.pdf");
+    console.log("Incoming request:", { name, email });
 
+    // build path
+    const pdfPath = path.join(process.cwd(), "uploads", "aastha-chits-brochure.pdf");
+    console.log("Looking for brochure at:", pdfPath);
+
+    // check file
     if (!fs.existsSync(pdfPath)) {
+      console.error("Brochure missing at path:", pdfPath);
       return res.status(404).json({ success: false, message: "Brochure file not found" });
     }
 
+    // read file
     const pdfBuffer = fs.readFileSync(pdfPath);
+    console.log("PDF loaded, size (bytes):", pdfBuffer.length);
 
+    // check API key
+    if (!process.env.RESEND_API_KEY) {
+      console.error("Resend API key missing!");
+      return res.status(500).json({ success: false, message: "Server misconfigured: missing API key" });
+    }
+
+    // send email
     const response = await resendClient.emails.send({
-      from: "onboarding@resend.dev",   // swap with your domain email once verified
+      from: "onboarding@resend.dev", // replace once your domain is verified
       to: email,
       subject: "Aastha Chits - Brochure Request",
       html: `<p>Hi ${name},</p>
@@ -29,13 +44,18 @@ export const sendBrochureEmail = async (req, res) => {
       ],
     });
 
-    console.log("Resend response:", response);
+    console.log("Resend API response:", response);
     res.status(200).json({ success: true, response });
   } catch (error) {
     console.error("Email sending failed:", error);
-    res.status(500).json({ success: false, error: error.message || "Failed to send email" });
+    res.status(500).json({
+      success: false,
+      error: error.message || "Failed to send email",
+      stack: error.stack, // for deeper debugging on Render logs
+    });
   }
 };
+
 
 export const enrollmentEmail = async (req, res) => {
   const { name, email, phone, plan } = req.body;
