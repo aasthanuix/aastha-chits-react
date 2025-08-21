@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import bcrypt from 'bcryptjs';
 import Admin from './models/adminModel.js';
 
 dotenv.config();
@@ -11,7 +12,7 @@ const seedAdmin = async () => {
     console.log('MongoDB connected');
 
     // Check if an admin already exists
-    const existingAdmin = await Admin.findOne({ email: 'admin@aasthachits.com' });
+    const existingAdmin = await Admin.findOne({ email: process.env.ADMIN_EMAIL });
     if (existingAdmin) {
       console.log('Admin already exists');
       process.exit();
@@ -19,9 +20,9 @@ const seedAdmin = async () => {
 
     // Create the admin
     await Admin.create({
-      name: 'Super Admin',
-      email: 'admin@aasthachits.com',
-      password: 'chitsAdmin@123', 
+      name: process.env.ADMIN_NAME,
+      email: process.env.ADMIN_EMAIL,
+      password: process.env.ADMIN_PASSWORD,
     });
 
     console.log('Admin user created successfully');
