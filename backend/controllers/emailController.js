@@ -31,7 +31,7 @@ export const sendBrochureEmail = async (req, res) => {
     // send email
     const response = await resendClient.emails.send({
       from: "onboarding@resend.dev", // replace once your domain is verified
-      to: email,
+      to: "csvarshini01@gmail.com",
       subject: "Aastha Chits - Brochure Request",
       html: `<p>Hi ${name},</p>
              <p>Thanks for your interest in Aastha Chits. Please find the brochure attached.</p>`,
