@@ -20,7 +20,7 @@ import Auctions from './pages/Auctions/Auctions';
 
 const App = () => {
 
-  const url = "http://localhost:4000";
+  const url = "https://aasthachits-backend.onrender.com";
   
   return (
     <Routes>
