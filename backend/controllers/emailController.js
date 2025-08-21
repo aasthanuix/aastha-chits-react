@@ -38,6 +38,7 @@ export const sendBrochureEmail = async (req, res) => {
     res.status(500).json({ success: false, error: error.message || "Failed to send email" });
   }
 };
+
 export const enrollmentEmail = async (req, res) => {
   const { name, email, phone, plan } = req.body;
 
