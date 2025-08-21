@@ -88,7 +88,7 @@ const AdminProfile = ({ url }) => {
     }
 
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('token');
       if (!token) throw new Error('Admin not logged in');
 
       const formDataToSend = new FormData();
