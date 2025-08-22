@@ -79,7 +79,7 @@ router.post('/generate-credentials', protect, async (req, res) => {
 
    
     const emailRes = await resend.emails.send({
-      from: process.env.RESEND_API_KEY, 
+      from: process.env.EMAIL_FROM, 
       to: [email],
       subject: 'Your Aastha Chits Login Credentials',
       html: `
