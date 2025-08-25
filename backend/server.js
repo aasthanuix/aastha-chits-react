@@ -67,7 +67,7 @@ io.on('connection', (socket) => {
 const allowedOrigins = [
   'http://localhost:5173', 
   'http://localhost:5174',
-  "https://user.aasthageooads.com",
+  "http://user.aasthageooads.com",
   "https://aasthageooads.com",
 ];
 
