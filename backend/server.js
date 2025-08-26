@@ -63,20 +63,27 @@ io.on('connection', (socket) => {
 });
 
 // Allowed origins
-
 const allowedOrigins = [
-  "http://localhost:5173", 
+  "http://localhost:5173",
   "http://localhost:5174",
   "https://user.aasthageooads.com",
   "https://admin.aasthageooads.com",
-  "https://aasthageooads.com",
-  "http://user.aasthageooads.com"
+  "https://aasthageooads.com"
 ];
 
+// Express CORS
 app.use(cors({
-  origin: "*",
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // allow non-browser requests
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS: " + origin));
+    }
+  },
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
 }));
 
 app.options('*', cors()); // handle preflight requests
