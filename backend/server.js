@@ -76,7 +76,8 @@ const allowedOrigins = [
   "https://user.aasthageooads.com",
   "https://admin.aasthageooads.com",
   "https://aasthageooads.com",
-  "https://aasthachits-admin.onrender.com"
+  "https://aasthachits-admin.onrender.com",
+  "https://aasthachits-frontend.onrender.com"
 ];
 
 // Express CORS
