@@ -6,6 +6,7 @@ import http from 'http';
 import { connectDB } from './config/db.js';
 import { initIO } from './config/socket.js';
 
+// Import Routes
 import emailRoutes from './routes/emailRoute.js';
 import adminRoutes from './routes/adminRoute.js';
 import userRoutes from './routes/userRoute.js';
@@ -20,13 +21,52 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
+// Allowed origins - Define them immediately for use in middleware
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://user.aasthageooads.com",
+  "https://admin.aasthageooads.com",
+  "https://aasthageooads.com",
+  "https://aasthachits-admin.onrender.com",
+  "https://aasthachits-frontend.onrender.com"
+];
 
-const PORT = process.env.PORT || 6000; 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// ------------------------------------------------------------------
+// 1. 🚀 EARLY MIDDLEWARE (CORS & Body Parsing) - FIX FOR PREFLIGHT
+// ------------------------------------------------------------------
 
-const io = initIO(server); // Socket.IO instance
+// Express CORS Configuration (Must be early to handle preflight OPTIONS)
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // Allow non-browser requests (e.g., Postman, server-to-server)
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true); 
+    } else {
+      // Log the disallowed origin for debugging purposes
+      console.error("CORS Blocked Origin:", origin);
+      return callback(new Error("Not allowed by CORS: " + origin));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+
+// Handle preflight requests explicitly, MUST come after app.use(cors)
+app.options('*', cors()); 
+
+// Body parser - required to parse JSON requests
+app.use(express.json()); 
+
+// Static files
+app.use('/uploads', express.static('uploads'));
+
+// ------------------------------------------------------------------
+// 2. 🔌 SOCKET.IO SETUP & MIDDLEWARE
+// ------------------------------------------------------------------
+
+const io = initIO(server); 
 
 // Attach io to all requests for controllers
 app.use((req, _res, next) => {
@@ -69,50 +109,28 @@ io.on('connection', (socket) => {
   });
 });
 
-// Allowed origins
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "https://user.aasthageooads.com",
-  "https://admin.aasthageooads.com",
-  "https://aasthageooads.com",
-  "https://aasthachits-admin.onrender.com",
-  "https://aasthachits-frontend.onrender.com"
-];
 
-// Express CORS
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // allow non-browser requests
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error("Not allowed by CORS: " + origin));
-    }
-  },
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
+// ------------------------------------------------------------------
+// 3. 🗺️ API ROUTES
+// ------------------------------------------------------------------
 
-app.options('*', cors()); // handle preflight requests
-
-
-app.use(express.json());
-app.use('/uploads', express.static('uploads'));
-
-// API Routes
 app.use('/api', emailRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/chit-plans', chitPlanRoutes);
 app.use('/api/transactions', transactionRoutes);
-app.use('/api/auctions', auctionRoutes); // handles public & admin
+app.use('/api/auctions', auctionRoutes);
 
 app.get('/', (_req, res) => res.send('API Working'));
 
-// Start server
-// const PORT = process.env.PORT || 4000;
+// ------------------------------------------------------------------
+// 4. 🚀 START SERVER (Final Fix: Use the 'server' object)
+// ------------------------------------------------------------------
 
-// server.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+const PORT = process.env.PORT || 6000; 
+
+// START THE SERVER USING THE HTTP SERVER OBJECT (`server`), NOT `app.listen()`
+server.listen(PORT, '0.0.0.0', () => { 
+  console.log(`Server running on port ${PORT}`);
+});
