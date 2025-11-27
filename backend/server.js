@@ -75,7 +75,8 @@ const allowedOrigins = [
   "http://localhost:5174",
   "https://user.aasthageooads.com",
   "https://admin.aasthageooads.com",
-  "https://aasthageooads.com"
+  "https://aasthageooads.com",
+  "https://admin.aasthageooads.com/"
 ];
 
 // Express CORS
