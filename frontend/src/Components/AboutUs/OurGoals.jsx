@@ -43,7 +43,7 @@ const OurGoals = () => {
                   </div>
                   <div className="featured-content">
                     <h3 className="featured-title">
-                      <a href="blog-sidebar.html" className="stretched-link">Daily Financial Guidance</a>
+                      <a className="stretched-link">Daily Financial Guidance</a>
                     </h3>
                     <p>Stay informed with expert advice to help you reach your financial milestones with ease.</p>
                   </div>
@@ -63,7 +63,7 @@ const OurGoals = () => {
                   </div>
                   <div className="featured-content">
                     <h3 className="featured-title">
-                      <a href="blog-sidebar.html" className="stretched-link">Consistent Returns</a>
+                      <a className="stretched-link">Consistent Returns</a>
                     </h3>
                     <p>Our structured chit plans ensure returns that are both reliable and rewarding.</p>
                   </div>
@@ -83,7 +83,7 @@ const OurGoals = () => {
                   </div>
                   <div className="featured-content">
                     <h3 className="featured-title">
-                      <a href="blog-sidebar.html" className="stretched-link">Achieve Financial Freedom</a>
+                      <a className="stretched-link">Achieve Financial Freedom</a>
                     </h3>
                     <p>Join Aastha Chits to take confident steps toward a financially independent future.</p>
                   </div>
