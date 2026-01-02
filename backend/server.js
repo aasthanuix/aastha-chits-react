@@ -26,8 +26,8 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "https://universalsexports.com",
-  "https://aasthachits-admin.onrender.com",
-  "https://aasthachits-frontend.onrender.com"
+  "https://www.universalsexports.com",
+  "https://universalsexports.com"
 ];
 
 // ------------------------------------------------------------------
