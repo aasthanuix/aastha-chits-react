@@ -27,7 +27,8 @@ const allowedOrigins = [
   "http://localhost:5174",
   "https://universalsexports.com",
   "https://www.universalsexports.com",
-  "https://universalsexports.com"
+  "https://universalsexports.com",
+  "https://admin.universalsexports.com/"
 ];
 
 // ------------------------------------------------------------------
