@@ -28,7 +28,7 @@ const allowedOrigins = [
   "https://universalsexports.com",
   "https://www.universalsexports.com",
   "https://universalsexports.com",
-  "https://admin.universalsexports.com/"
+  "https://admin.universalsexports.com"
 ];
 
 // ------------------------------------------------------------------
