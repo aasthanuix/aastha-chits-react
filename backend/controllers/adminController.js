@@ -2,6 +2,8 @@ import Admin from '../models/adminModel.js';
 import User from '../models/userModel.js';
 import ChitPlan from '../models/chitPlanModel.js';
 import Transaction from '../models/transactionsModel.js';
+import cloudinary from '../config/cloudinary.js';
+import streamifier from 'streamifier';
 
 import jwt from 'jsonwebtoken';
 
@@ -66,3 +68,17 @@ export const getAdminStats = async (req, res) => {
   }
 };
 
+export const uploadToCloudinary = (buffer, folder, resourceType = 'image') => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder, resource_type: resourceType },
+      (error, result) => {
+        if (result) resolve(result);
+        else reject(error);
+        
+      }
+    );
+
+    streamifier.createReadStream(buffer).pipe(stream);
+  });
+};
