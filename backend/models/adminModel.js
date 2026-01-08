@@ -6,7 +6,7 @@ const adminSchema = new mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String, unique: true, required: true },
     password: { type: String, required: true },
-    avatar: { type: String }
+    avatar: { type: String }, // Cloudinary URL
   },
   { timestamps: true }
 );
@@ -18,9 +18,7 @@ adminSchema.pre('save', async function (next) {
 });
 
 adminSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+  return bcrypt.compare(enteredPassword, this.password);
 };
 
-const adminModel = mongoose.models.Admin || mongoose.model('Admin', adminSchema);
-
-export default adminModel;
+export default mongoose.model('Admin', adminSchema);
