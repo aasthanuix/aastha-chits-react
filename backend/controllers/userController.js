@@ -6,6 +6,7 @@ import path from 'path';
 import { generateResetToken } from '../utils/tokenUtils.js';
 import resendClient from '../config/resend.js';
 import crypto from 'crypto';
+import cloudinary from "../config/cloudinary.js";
 import streamifier from "streamifier";
 
 // Add User with multiple chit plans
@@ -98,14 +99,15 @@ export const getUserById = async (req, res) => {
 };
 
 // Upload profile picture
-
 export const uploadProfilePic = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const userId = req.user.id;
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
     const uploadStream = cloudinary.uploader.upload_stream(
       {
@@ -114,11 +116,12 @@ export const uploadProfilePic = async (req, res) => {
       },
       async (error, result) => {
         if (error) {
+          console.error("Cloudinary upload error:", error);
           return res.status(500).json({ message: "Cloudinary upload failed" });
         }
 
         const user = await User.findByIdAndUpdate(
-          userId,
+          req.user._id,
           { profilePic: result.secure_url },
           { new: true }
         ).select("-password");
@@ -129,6 +132,7 @@ export const uploadProfilePic = async (req, res) => {
 
     streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
   } catch (error) {
+    console.error("Profile upload crash:", error);
     res.status(500).json({ message: "Profile upload failed" });
   }
 };
@@ -302,6 +306,3 @@ export const getUserDashboard = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
-
-
-
