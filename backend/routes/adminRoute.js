@@ -1,99 +1,125 @@
-import express from 'express';
 import Admin from '../models/adminModel.js';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import  {protect} from '../middlewares/authMiddleware.js';
-import upload from '../middlewares/upload.js';
-import {getAdminStats, uploadToCloudinary} from '../controllers/adminController.js'
 import User from '../models/userModel.js';
+import ChitPlan from '../models/chitPlanModel.js';
+import Transaction from '../models/transactionsModel.js';
+import cloudinary from '../config/cloudinary.js';
+import streamifier from 'streamifier';
 
-const router = express.Router();
+import jwt from 'jsonwebtoken';
 
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+
+export const loginAdmin = async (req, res) => {
   try {
+    const { email, password } = req.body;
     const admin = await Admin.findOne({ email });
-    if (!admin) return res.status(401).json({ message: 'Invalid email or password' });
 
-    const isMatch = await bcrypt.compare(password, admin.password);
-    if (!isMatch) return res.status(401).json({ message: 'Invalid email or password' });
-
-    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    res.json({ token });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-/* ---------------- GET PROFILE ---------------- */
-router.get('/profile', protect, async (req, res) => {
-  const admin = req.user;
-
-  res.json({
-    name: admin.name,
-    email: admin.email,
-    role: 'Super Admin',
-    avatar: admin.avatar || null,
-  });
-});
-
-/* ---------------- UPDATE PROFILE ---------------- */
-
-router.put('/profile', protect, upload.single('avatar'), async (req, res) => {
-  try {
-    const admin = await Admin.findById(req.user.id);
-    if (!admin) return res.status(404).json({ message: 'Admin not found' });
-
-    admin.name = req.body.name || admin.name;
-    admin.email = req.body.email || admin.email;
-
-    if (req.body.password) admin.password = req.body.password;
-
-    if (req.file) {
-      const result = await uploadToCloudinary(req.file.buffer, 'admin-avatars', 'image');
-      admin.avatar = result.secure_url;
+    if (admin && (await admin.matchPassword(password))) {
+      res.json({
+        _id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        token: generateToken(admin._id),
+      });
+    } else {
+      res.status(401).json({ message: 'Invalid email or password' });
     }
-
-    const updatedAdmin = await admin.save();
-    res.json({
-     message: 'Profile updated successfully!', // ✅ Add message
-      data: {
-        name: updatedAdmin.name,
-        email: updatedAdmin.email,
-        role: 'Super Admin',
-        avatar: updatedAdmin.avatar || null,
-      },
-    });
   } catch (error) {
-    console.error('Profile update failed:', error);
-    res.status(500).json({ message: 'Failed to update profile', error: error.message });
+    res.status(500).json({ message: error.message });
   }
-});
+};
 
-router.post('/:id/transactions', protect, async (req, res) => {
+export const getAdminProfile = async (req, res) => {
   try {
-    const { amount, status } = req.body;
-    if (!amount) return res.status(400).json({ message: 'Amount is required' });
+    const admin = await Admin.findById(req.user.id).select('-password');
+    res.json(admin);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
-    const transaction = { amount, date: new Date(), status: status || 'Pending' };
 
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+export const getAdminStats = async (req, res) => {
+  try {
+    const [
+      totalUsers,
+      totalChits,
+      totalTransactions,
 
-    user.transactions.push(transaction);
-    await user.save();
+      monthlyTransactions,
+      monthlyUsers,
 
-    res.status(201).json({
-      message: 'Transaction added by admin',
-      transactions: user.transactions
+      recentActivity
+    ] = await Promise.all([
+      User.countDocuments(),
+      ChitPlan.countDocuments(),
+      Transaction.countDocuments(),
+
+      // Monthly transaction totals
+      Transaction.aggregate([
+        {
+          $group: {
+            _id: {
+              month: { $month: "$date" },
+              year: { $year: "$date" }
+            },
+            total: { $sum: "$amount" }
+          }
+        },
+        { $sort: { "_id.year": 1, "_id.month": 1 } }
+      ]),
+
+      // Monthly user growth
+      User.aggregate([
+        {
+          $group: {
+            _id: {
+              month: { $month: "$createdAt" },
+              year: { $year: "$createdAt" }
+            },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { "_id.year": 1, "_id.month": 1 } }
+      ]),
+
+      // Recent activity feed
+      Transaction.find()
+        .sort({ date: -1 })
+        .limit(10)
+        .populate("user", "name")
+        .select("amount status date")
+    ]);
+
+    res.json({
+      totalUsers,
+      totalTransactions,
+      totalChits,
+      monthlyTransactions,
+      monthlyUsers,
+      recentActivity: recentActivity.map(tx => ({
+        userName: tx.user?.name || "User",
+        amount: tx.amount,
+        status: tx.status,
+        date: tx.date
+      }))
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error adding transaction', error: error.message });
+    console.error("[getAdminStats] Error:", error);
+    res.status(500).json({ message: "Failed to fetch dashboard analytics" });
   }
-});
+};
 
+export const uploadToCloudinary = (buffer, folder, resourceType = 'image') => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder, resource_type: resourceType },
+      (error, result) => {
+        if (result) resolve(result);
+        else reject(error);
+      }
+    );
 
-router.get('/stats', protect, getAdminStats);
-
-export default router;
-
+    streamifier.createReadStream(buffer).pipe(stream);
+  });
+};
