@@ -6,6 +6,7 @@ import path from 'path';
 import { generateResetToken } from '../utils/tokenUtils.js';
 import resendClient from '../config/resend.js';
 import crypto from 'crypto';
+import streamifier from "streamifier";
 
 // Add User with multiple chit plans
 export const addUser = asyncHandler(async (req, res) => {
@@ -97,25 +98,38 @@ export const getUserById = async (req, res) => {
 };
 
 // Upload profile picture
-export const uploadUserProfilePic = async (req, res) => {
+
+export const uploadProfilePic = async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+      return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+    const userId = req.user.id;
 
-    // Save relative path to database (not absolute file path)
-    user.profilePic = path.posix.join('uploads/user-profiles', req.file.filename);
-    await user.save();
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: "user_profiles",
+        resource_type: "image",
+      },
+      async (error, result) => {
+        if (error) {
+          return res.status(500).json({ message: "Cloudinary upload failed" });
+        }
 
-    res.json({ message: 'Profile picture updated', profilePic: user.profilePic });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+        const user = await User.findByIdAndUpdate(
+          userId,
+          { profilePic: result.secure_url },
+          { new: true }
+        ).select("-password");
+
+        res.status(200).json(user);
+      }
+    );
+
+    streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+  } catch (error) {
+    res.status(500).json({ message: "Profile upload failed" });
   }
 };
 
