@@ -11,7 +11,7 @@ import {
   getUserDashboard,
   getUserById,
   updateUser,
-  uploadUserProfilePic,
+  uploadProfilePic,
   forgotPassword,
   resetPassword,
 } from '../controllers/userController.js';
@@ -151,7 +151,12 @@ router.delete('/:id', protect, async (req, res) => {
 });
 
 // UPLOAD PROFILE PIC
-router.post('/profile-pic', protect, uploadProfilePic.single('profilePic'), uploadUserProfilePic);
+router.post(
+  "/profile-pic",
+  protect,
+  upload.single("profilePic"),
+  uploadProfilePic
+);
 
 // Forgot/Reset Password
 router.post('/forgot-password', forgotPassword);
