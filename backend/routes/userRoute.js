@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { Resend } from 'resend';
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import upload from "../middlewares/upload.js";
 import User from '../models/userModel.js';
 import ChitPlan from '../models/chitPlanModel.js';
 import { protect } from '../middlewares/authMiddleware.js';
