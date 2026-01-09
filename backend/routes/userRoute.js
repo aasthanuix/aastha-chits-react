@@ -15,7 +15,7 @@ import {
   forgotPassword,
   resetPassword,
 } from '../controllers/userController.js';
-import uploadProfilePic from '../config/userProfile.js';
+// import uploadProfilePic from '../config/userProfile.js';
 
 const router = express.Router();
 
