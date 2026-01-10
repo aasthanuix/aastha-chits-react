@@ -76,7 +76,7 @@ const allowedOrigins = [
   "http://localhost:5174",
   "https://www.universalsexports.com",
   "https://universalsexports.com",
-  "https://admin.universalsexports.com",
+  "https://aastha-chits-react-2025.vercel.app",
 ];
 
 // Express CORS
