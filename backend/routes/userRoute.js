@@ -1,166 +1,208 @@
-import express from 'express';
-import jwt from 'jsonwebtoken';
-import { Resend } from 'resend';
-import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
-import upload from "../middlewares/upload.js";
-import User from '../models/userModel.js';
-import ChitPlan from '../models/chitPlanModel.js';
-import { protect } from '../middlewares/authMiddleware.js';
-import {
-  addUser,
-  getUserDashboard,
-  getUserById,
-  updateUser,
-  uploadProfilePic,
-  forgotPassword,
-  resetPassword,
-} from '../controllers/userController.js';
-// import uploadProfilePic from '../config/userProfile.js';
+import React, { useState, useEffect } from 'react';
+import emailjs from '@emailjs/browser';
+import './CredentialGenerator.css';
 
-const router = express.Router();
+const CredentialGenerator = ({ url }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    chitPlan: [],
+  });
 
-//  Initialize Resend properly
-const resend = new Resend(process.env.RESEND_API_KEY);
+  const [plans, setPlans] = useState([]);
+  const [message, setMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [generatedCredentials, setGeneratedCredentials] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-// JWT Generator
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+  // Fetch chit plans
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${url}/api/chit-plans`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (res.ok) setPlans(data);
+      } catch (error) {
+        console.error('Error fetching plans:', error);
+      }
+    };
+    fetchPlans();
+  }, [url]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePlanToggle = (id) => {
+    setFormData(prev => ({
+      ...prev,
+      chitPlan: prev.chitPlan.includes(id)
+        ? prev.chitPlan.filter(p => p !== id)
+        : [...prev.chitPlan, id],
+    }));
+  };
+
+  // Validation
+  const validateInputs = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[6-9]\d{9}$/;
+
+    if (!formData.name.trim()) return 'Name is required';
+    if (!emailRegex.test(formData.email)) return 'Enter a valid email address';
+    if (formData.phone && !phoneRegex.test(formData.phone))
+      return 'Enter a valid 10-digit phone number';
+    if (!formData.chitPlan.length) return 'Select at least one chit plan';
+
+    return null;
+  };
+
+  // Send credentials via EmailJS
+  const sendCredentialsEmail = async ({ name, to_email, userId, password, loginUrl }) => {
+  return emailjs.send(
+    import.meta.env.VITE_EMAILJS_SERVICE_ID,
+    import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+    {
+      to_email,
+      name,
+      userId,
+      password,
+      loginUrl,
+    },
+    import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+  );
 };
 
-// ================= USER LOGIN =================
-router.post('/login', async (req, res) => {
-  const { userId, password } = req.body;
+  // Generate credentials
+  const handleGenerate = async (e) => {
+    e.preventDefault();
+    const validationError = validateInputs();
+    if (validationError) return showMessage(validationError, false);
 
-  try {
-    const user = await User.findOne({ userId }).populate('enrolledChits');
-    if (!user) return res.status(401).json({ message: 'Invalid User ID or Password' });
+    setLoading(true);
 
-    const isMatch = await user.matchPassword(password);
-    if (!isMatch) return res.status(401).json({ message: 'Invalid User ID or Password' });
+    try {
+      const token = localStorage.getItem('token');
 
-    const token = generateToken(user._id);
-    res.json({ token, user });
-  } catch (error) {
-    console.error('Login Error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-});
+      const payload = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        enrolledChits: formData.chitPlan,
+      };
 
-// ============ GENERATE CREDENTIALS + EMAIL ============
-router.post('/generate-credentials', protect, async (req, res) => {
-  try {
-    const { name, email, phone, enrolledChits = [] } = req.body;
+      const res = await fetch(`${url}/api/users/generate-credentials`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
-    // generate userId and password
-    const userId = `USR${Math.floor(1000 + Math.random() * 9000)}`;
-    const password = Math.random().toString(36).slice(-8);
+      const data = await res.json();
 
-    // validate enrolledChits (convert names/ids to ObjectIds)
-    const chitPlanIds = [];
-    for (const chit of enrolledChits) {
-      let plan;
-      if (mongoose.Types.ObjectId.isValid(chit)) {
-        plan = await ChitPlan.findById(chit);
-      } else {
-        plan = await ChitPlan.findOne({ planName: chit });
+      if (!res.ok) {
+        showMessage(data.message || 'Failed to generate credentials', false);
+        setLoading(false);
+        return;
       }
-      if (plan) chitPlanIds.push(plan._id);
+
+      // Send email
+      await sendCredentialsEmail({
+  name: payload.name,
+  to_email: payload.email,  
+  userId: data.userId,
+  password: data.password,
+  loginUrl: 'https://universalsexports.com/login', 
+});
+
+      showMessage('Credentials generated and emailed successfully', true);
+
+      setGeneratedCredentials({
+        userId: data.userId,
+        password: data.password,
+      });
+
+      setFormData({ name: '', email: '', phone: '', chitPlan: [] });
+
+    } catch (error) {
+      console.error(error);
+      showMessage('Something went wrong. Try again.', false);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // create new user
-    const newUser = await User.create({
-      name,
-      email,
-      phone,
-      userId,
-      password,
-      enrolledChits: chitPlanIds,
-    });
+  const showMessage = (msg, success) => {
+    setMessage(msg);
+    setIsSuccess(success);
+    setTimeout(() => setMessage(''), 4000);
+  };
 
-   
-    const emailRes = await resend.emails.send({
-      from: process.env.EMAIL_FROM, 
-      to: [email],
-      subject: 'Your Aastha Chits Login Credentials',
-      html: `
-        <h2>Welcome to Aastha Chits, ${name}!</h2>
-        <p>Your account has been created successfully. Here are your login details:</p>
-        <ul>
-          <li><strong>User ID:</strong> ${userId}</li>
-          <li><strong>Password:</strong> ${password}</li>
-        </ul>
-        <p>You can now log in and start using our platform.</p>
-        <br/>
-        <p>Best regards,<br/>Aastha Chits Team</p>
-      `,
-    });
+  return (
+    <div className="credential-generator-card">
+      <h2 className="cg-title">Generate User Credentials</h2>
 
-    res.status(201).json({
-      success: true,
-      message: 'Credentials generated and emailed successfully',
-      userId,
-      password,
-      enrolledChits: chitPlanIds,
-      emailResponse: emailRes, // helpful for debugging
-    });
-  } catch (error) {
-    console.error('Error generating credentials:', error);
+      <form className="credential-form" onSubmit={handleGenerate}>
+        <div className="input-group">
+          <input name="name" value={formData.name} onChange={handleChange} required />
+          <label>Name</label>
+        </div>
 
-    res.status(500).json({
-      message: 'Failed to generate credentials',
-      error: error.message || error.toString(),
-      stack: error.stack,
-      details: error.response?.body || error.response || null,
-    });
-  }
-});
+        <div className="input-group">
+          <input name="email" type="email" value={formData.email} onChange={handleChange} required />
+          <label>Email</label>
+        </div>
 
-// ================= CRUD Routes =================
+        <div className="input-group">
+          <input name="phone" value={formData.phone} onChange={handleChange} />
+          <label>Phone</label>
+        </div>
 
-// CREATE USER (ADMIN ONLY)
-router.post('/', protect, addUser);
+        <div className="chit-plan-group">
+          <label>Select Chit Plans</label>
+          <div className="plan-options">
+            {plans.map(plan => (
+              <div key={plan._id} className="plan-option">
+                <input
+                  type="checkbox"
+                  id={plan._id}
+                  checked={formData.chitPlan.includes(plan._id)}
+                  onChange={() => handlePlanToggle(plan._id)}
+                />
+                <label htmlFor={plan._id}>
+                  {plan.planName} – ₹{plan.monthlySubscription}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
 
-// GET USER DASHBOARD (AUTH)
-router.get('/dashboard', protect, getUserDashboard);
+        <button type="submit" className="generate-btn" disabled={loading}>
+          {loading ? 'Generating…' : 'Generate & Send'}
+        </button>
+      </form>
 
-// GET ALL USERS (ADMIN ONLY)
-router.get('/', protect, async (req, res) => {
-  try {
-    const users = await User.find().populate('enrolledChits').sort({ createdAt: -1 });
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching users', error: error.message });
-  }
-});
+      {message && (
+        <p className={isSuccess ? 'success-msg' : 'error-msg'}>
+          {message}
+        </p>
+      )}
 
-// GET SINGLE USER BY ID
-router.get('/:id', protect, getUserById);
+      {generatedCredentials && (
+        <div className="generated-credentials">
+          <h3>Generated Credentials</h3>
+          <p><strong>User ID:</strong> {generatedCredentials.userId}</p>
+          <p><strong>Password:</strong> {generatedCredentials.password}</p>
+        </div>
+      )}
+    </div>
+  );
+};
 
-// UPDATE USER
-router.put('/:id', protect, updateUser);
-
-// DELETE USER (ADMIN ONLY)
-router.delete('/:id', protect, async (req, res) => {
-  try {
-    const deletedUser = await User.findByIdAndDelete(req.params.id);
-    if (!deletedUser) return res.status(404).json({ message: 'User not found' });
-    res.json({ message: 'User deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error deleting user', error: error.message });
-  }
-});
-
-// UPLOAD PROFILE PIC
-router.post(
-  "/profile-pic",
-  protect,
-  upload.single("profilePic"),
-  uploadProfilePic
-);
-
-// Forgot/Reset Password
-router.post('/forgot-password', forgotPassword);
-router.post('/reset-password', resetPassword);
-
-export default router;
+export default CredentialGenerator;
