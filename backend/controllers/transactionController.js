@@ -1,39 +1,45 @@
 import Transaction from '../models/transactionsModel.js'; 
 import User from '../models/userModel.js';
 import ChitPlan from '../models/chitPlanModel.js';
+import { sendTransactionEmail } from "../utils/emailService.js";
 
 export const addTransaction = async (req, res) => {
   try {
     const { chitPlanId, amount, date } = req.body;
     const { userId } = req.params;
 
-    if (!chitPlanId || !amount || !date) {
-      return res.status(400).json({ message: 'All fields are required' });
+    const user = await User.findById(userId);
+    const chitPlan = await ChitPlan.findById(chitPlanId);
+
+    if (!user || !chitPlan) {
+      return res.status(404).json({ message: "User or Plan not found" });
     }
 
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    const chitPlan = await ChitPlan.findById(chitPlanId);
-    if (!chitPlan) return res.status(404).json({ message: 'Chit Plan not found' });
-
-    const transaction = new Transaction({
+    const transaction = await Transaction.create({
       user: userId,
       chitPlan: chitPlanId,
       amount,
       date,
-      status: 'Pending',
+      status: "Pending",
     });
 
-    await transaction.save();
+    // 🔔 SEND EMAIL
+    await sendTransactionEmail({
+      userEmail: user.email,
+      userName: user.name,
+      planName: chitPlan.planName,
+      amount,
+      status: "Pending",
+      date,
+    });
 
     res.status(201).json({
-      message: 'Transaction added successfully',
-      transaction
+      message: "Transaction added and email sent",
+      transaction,
     });
   } catch (error) {
-    console.error('Error adding transaction:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error("Add Transaction Error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -43,26 +49,36 @@ export const updateTransactionStatus = async (req, res) => {
     const { txnId } = req.params;
     const { status } = req.body;
 
-    const validStatuses = ['Pending', 'Paid', 'Failed', 'Cancelled'];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({ message: 'Invalid status value' });
-    }
+    const transaction = await Transaction.findById(txnId)
+      .populate("user")
+      .populate("chitPlan");
 
-    const transaction = await Transaction.findById(txnId);
     if (!transaction) {
-      return res.status(404).json({ message: 'Transaction not found' });
+      return res.status(404).json({ message: "Transaction not found" });
     }
 
     transaction.status = status;
     await transaction.save();
 
-    res.json({ message: `Transaction marked as ${status}`, transaction });
+    // 🔔 SEND EMAIL
+    await sendTransactionEmail({
+      userEmail: transaction.user.email,
+      userName: transaction.user.name,
+      planName: transaction.chitPlan.planName,
+      amount: transaction.amount,
+      status,
+      date: transaction.date,
+    });
+
+    res.json({
+      message: `Transaction marked as ${status} and email sent`,
+      transaction,
+    });
   } catch (error) {
-    console.error('Error updating transaction status:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error("Update Status Error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
-
 
 // DELETE /api/transactions/:txnId
 export const deleteTransaction = async (req, res) => {
