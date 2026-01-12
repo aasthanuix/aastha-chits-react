@@ -38,33 +38,80 @@ export const getAdminProfile = async (req, res) => {
   }
 };
 
-
+// ---------------------- Get Admin Stats ----------------------
 export const getAdminStats = async (req, res) => {
   try {
-    const [
-      totalUsers,
-      activeUsers,
-      totalChits,
-      totalTransactions,
-      totalPendingTransactions
-    ] = await Promise.all([
-      User.countDocuments(),
-      User.countDocuments({ enrolledChits: { $exists: true, $nin: [[], null] } }),
-      ChitPlan.countDocuments(), // count all chits (no status filter)
-      Transaction.countDocuments(),
-      Transaction.countDocuments({ status: { $regex: /^pending$/i } }) 
+    // ---------------- Users ----------------
+    const totalUsers = await User.countDocuments();
+    const sevenDaysAgo = new Date();
+sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+const activeUsers = await User.countDocuments({
+  lastLogin: { $gte: sevenDaysAgo }
+});
+
+    // ---------------- Chits ----------------
+    const totalChits = await ChitPlan.countDocuments();
+    const completedChits = await ChitPlan.countDocuments({ status: 'Completed' }); // if you track status
+
+    // ---------------- Transactions ----------------
+    const totalTransactions = await Transaction.countDocuments();
+    const pendingTransactions = await Transaction.countDocuments({ status: 'Pending' });
+
+    // ---------------- Monthly Analytics (optional) ----------------
+    const monthlyTransactions = await Transaction.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: "$date" },
+            month: { $month: "$date" }
+          },
+          total: { $sum: "$amount" }
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
     ]);
 
+    const monthlyUsers = await User.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+
+    // ---------------- Recent Activity ----------------
+    const recentActivity = await Transaction.find()
+      .sort({ date: -1 })
+      .limit(10)
+      .populate("user", "name")
+      .select("amount status date");
+
+    // ---------------- Response ----------------
     res.json({
       totalUsers,
       activeUsers,
       totalChits,
+      completedChits,
       totalTransactions,
-      pendingTransactions: totalPendingTransactions
+      pendingTransactions,
+      monthlyTransactions,
+      monthlyUsers,
+      recentActivity: recentActivity.map(tx => ({
+        userName: tx.user?.name || "User",
+        amount: tx.amount,
+        status: tx.status,
+        date: tx.date
+      })),
     });
   } catch (error) {
-    console.error('[getAdminStats] Error:', error);
-    res.status(500).json({ message: 'Failed to fetch admin statistics', error: error.message });
+    console.error("[getAdminStats] Error:", error);
+    res.status(500).json({ message: "Failed to fetch dashboard analytics" });
   }
 };
 
@@ -75,7 +122,6 @@ export const uploadToCloudinary = (buffer, folder, resourceType = 'image') => {
       (error, result) => {
         if (result) resolve(result);
         else reject(error);
-        
       }
     );
 
