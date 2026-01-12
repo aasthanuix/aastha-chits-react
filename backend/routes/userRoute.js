@@ -13,15 +13,12 @@ import {
   getUserById,
   updateUser,
   uploadProfilePic,
-  forgotPassword,
-  resetPassword,
+  changePassword,
 } from '../controllers/userController.js';
-// import uploadProfilePic from '../config/userProfile.js';
+import { sendCredentialEmail } from "../utils/emailService.js";
+import { sendWhatsAppCredentials } from "../utils/whatsappService.js";
 
 const router = express.Router();
-
-//  Initialize Resend properly
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 // JWT Generator
 const generateToken = (id) => {
@@ -34,84 +31,124 @@ router.post('/login', async (req, res) => {
 
   try {
     const user = await User.findOne({ userId }).populate('enrolledChits');
-    if (!user) return res.status(401).json({ message: 'Invalid User ID or Password' });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid User ID or Password' });
+    }
 
     const isMatch = await user.matchPassword(password);
-    if (!isMatch) return res.status(401).json({ message: 'Invalid User ID or Password' });
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid User ID or Password' });
+    }
+
+    // 🔥 THIS IS THE MISSING BUSINESS LOGIC
+    user.isActive = true;
+    user.lastLogin = new Date();
+    await user.save();
 
     const token = generateToken(user._id);
-    res.json({ token, user });
+
+    res.json({
+      token,
+      user,
+    });
   } catch (error) {
     console.error('Login Error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({
+      message: 'Server error',
+      error: error.message,
+    });
   }
 });
 
 // ============ GENERATE CREDENTIALS + EMAIL ============
-router.post('/generate-credentials', protect, async (req, res) => {
+router.post("/generate-credentials", protect, async (req, res) => {
   try {
     const { name, email, phone, enrolledChits = [] } = req.body;
 
-    if (!name || !email) {
-      return res.status(400).json({ message: 'Name and email are required' });
+    if (!name || !email || !phone) {
+      return res.status(400).json({ message: "Missing fields" });
     }
 
-    // Check duplicate email
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'A user with this email already exists' });
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(400).json({ message: "User already exists" });
     }
 
-    // Generate userId and password
+    // Generate random credentials
     const userId = `USR${Math.floor(1000 + Math.random() * 9000)}`;
     const password = Math.random().toString(36).slice(-8);
 
-    // Validate enrolledChits
-    const chitPlanIds = [];
+    // Validate and map chit plans
+    const chitIds = [];
     for (const chit of enrolledChits) {
-      let plan;
       if (mongoose.Types.ObjectId.isValid(chit)) {
-        plan = await ChitPlan.findById(chit);
+        chitIds.push(chit);
       } else {
-        plan = await ChitPlan.findOne({ planName: chit });
+        const plan = await ChitPlan.findOne({ planName: chit });
+        if (plan) chitIds.push(plan._id);
       }
-      if (plan) chitPlanIds.push(plan._id);
     }
 
-    // Create new user
-    const newUser = await User.create({
+    // Create user in DB
+    await User.create({
       name,
       email,
       phone,
       userId,
       password,
-      enrolledChits: chitPlanIds,
+      enrolledChits: chitIds,
     });
 
+    // Send email + WhatsApp
+    const delivery = { email: false, whatsapp: false };
+
+    try {
+      await sendCredentialEmail({ name, email, userId, password });
+      delivery.email = true;
+    } catch (e) {
+      console.error("Email failed:", e.message);
+    }
+
+    try {
+      await sendWhatsAppCredentials({ name, phone, userId, password });
+      delivery.whatsapp = true;
+    } catch (e) {
+      console.error("WhatsApp failed:", e.message);
+    }
+
+    // Return credentials and delivery info to frontend
     res.status(201).json({
       success: true,
-      message: 'Credentials generated successfully',
+      message: "Credentials generated successfully",
       userId,
       password,
-      enrolledChits: chitPlanIds,
+      delivery,
     });
-
   } catch (error) {
-    console.error('Error generating credentials:', error);
+    console.error("Generate Credentials Error:", error);
     res.status(500).json({
-      message: 'Failed to generate credentials',
-      error: error.message || error.toString(),
+      success: false,
+      message: "Server error",
+      error: error.message,
     });
   }
 });
 
-// ================= CRUD Routes =================
+// GET USER DASHBOARD (AUTH)
+router.get('/dashboard', protect, getUserDashboard);
+
+router.put('/change-password', protect, changePassword);
+
+// UPLOAD PROFILE PIC
+router.post(
+  "/profile-pic",
+  protect,
+  upload.single("profilePic"),
+  uploadProfilePic
+);
 
 // CREATE USER (ADMIN ONLY)
 router.post('/', protect, addUser);
-
-// GET USER DASHBOARD (AUTH)
-router.get('/dashboard', protect, getUserDashboard);
 
 // GET ALL USERS (ADMIN ONLY)
 router.get('/', protect, async (req, res) => {
@@ -139,17 +176,5 @@ router.delete('/:id', protect, async (req, res) => {
     res.status(500).json({ message: 'Error deleting user', error: error.message });
   }
 });
-
-// UPLOAD PROFILE PIC
-router.post(
-  "/profile-pic",
-  protect,
-  upload.single("profilePic"),
-  uploadProfilePic
-);
-
-// Forgot/Reset Password
-router.post('/forgot-password', forgotPassword);
-router.post('/reset-password', resetPassword);
 
 export default router;
