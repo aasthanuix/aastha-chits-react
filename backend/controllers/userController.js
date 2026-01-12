@@ -75,6 +75,45 @@ export const updateUser = asyncHandler(async (req, res) => {
   res.json(user);
 });
 
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    if (newPassword.length < 6) {
+      return res
+        .status(400)
+        .json({ message: 'Password must be at least 6 characters' });
+    }
+
+    const user = await User.findById(req.user._id).select('+password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res
+        .status(401)
+        .json({ message: 'Current password is incorrect' });
+    }
+
+    user.password = newPassword; // pre-save hook hashes it
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password changed successfully',
+    });
+  } catch (error) {
+    console.error('Change Password Error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 export const getUserById = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -134,85 +173,6 @@ export const uploadProfilePic = async (req, res) => {
   } catch (error) {
     console.error("Profile upload crash:", error);
     res.status(500).json({ message: "Profile upload failed" });
-  }
-};
-
-export const forgotPassword = async (req, res) => {
-  const { email } = req.body;
-
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: 'No account found with this email' });
-    }
-
-    // Generate secure token
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-
-    // Save hashed token & expiry
-    user.resetPasswordToken = hashedToken;
-    user.resetPasswordExpires = Date.now() + 30 * 60 * 1000; // 30 min expiry
-    await user.save();
-
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-
-    // Styled HTML email
-    const emailHTML = `
-      <div style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px; border-radius: 8px; max-width: 500px; margin: auto; border: 1px solid #eee;">
-        <h2 style="color: #4CAF50; text-align: center;">Aastha Chits - Password Reset</h2>
-        <p>Dear ${user.name || 'User'},</p>
-        <p>We received a request to reset your password for your Aastha Chits account. Please click the button below to proceed:</p>
-        <div style="text-align: center; margin: 20px 0;">
-          <a href="${resetUrl}" style="background: #4CAF50; color: white; padding: 12px 20px; text-decoration: none; border-radius: 6px; font-size: 16px;">
-            Reset My Password
-          </a>
-        </div>
-        <p style="font-size: 14px; color: #666;">This link will expire in 30 minutes. If you did not request this, please ignore this email.</p>
-        <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
-        <p style="font-size: 12px; color: #999; text-align: center;">© ${new Date().getFullYear()} Aastha Chits. All rights reserved.</p>
-      </div>
-    `;
-
-    await resendClient.emails.send({
-      from: process.env.EMAIL_FROM,
-      to: email,
-      subject: 'Aastha Chits - Password Reset',
-      html: emailHTML
-    });
-
-    res.json({ message: 'Password reset link sent to your email' });
-  } catch (error) {
-    console.error('Forgot password error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-export const resetPassword = async (req, res) => {
-  const { token, newPassword } = req.body;
-
-  try {
-    const user = await User.findOne({
-      resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() }
-    });
-
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid or expired token' });
-    }
-
-    // Hash new password
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
-
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpires = undefined;
-    await user.save();
-
-    res.json({ message: 'Password reset successfully' });
-  } catch (error) {
-    console.error('Reset password error:', error);
-    res.status(500).json({ message: 'Server error' });
   }
 };
 
