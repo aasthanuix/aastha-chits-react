@@ -8,6 +8,6 @@ console.log('Brochure routes loaded!');
 
 // Upload brochure
 router.post('/admin/upload-brochure', upload.single('brochure'), uploadBrochure);
-router.post('/send-brochure', downloadBrochure)
+router.get('/send-brochure', downloadBrochure)
 
 export default router;
