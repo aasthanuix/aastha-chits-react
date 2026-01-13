@@ -11,4 +11,3 @@ router.post('/admin/upload-brochure', upload.single('brochure'), uploadBrochure)
 router.post('/send-brochure', downloadBrochure)
 
 export default router;
-
