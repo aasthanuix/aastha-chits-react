@@ -54,9 +54,19 @@ export const downloadBrochure = async (req, res) => {
       return res.status(404).json({ message: "No brochure available" });
     }
 
-    res.status(200).json({
-      fileUrl: brochure.fileUrl,
+    // Fetch PDF from Cloudinary
+    const pdfResponse = await axios.get(brochure.fileUrl, {
+      responseType: "stream",
     });
+
+    // 🔐 Force download + filename
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="Aastha-chits-brochure.pdf"'
+    );
+
+    pdfResponse.data.pipe(res);
   } catch (err) {
     console.error("Download brochure error:", err);
     res.status(500).json({ message: "Server error" });
